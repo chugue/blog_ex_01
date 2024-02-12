@@ -1,6 +1,7 @@
 package shop.mtcoding.blog.user;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class UserController {
     private final UserRepository userRepository;
+    private final HttpSession session;
 
 
     @PostMapping("/join")
@@ -37,6 +39,18 @@ public class UserController {
     @GetMapping("/loginForm")
     public String loginForm() {
         return "user/loginForm";
+    }
+
+    @PostMapping("/login")
+    public String login(UserRequest.LoginDTO requestDTO, HttpServletRequest request) {
+        User user = userRepository.findByUsernameAndPassword(requestDTO);
+        if (user == null ){
+            request.setAttribute("msg", "사용자를 찾을 수 없습니다.");
+            request.setAttribute("status", 404);
+            return "error/40x";
+        }
+        session.setAttribute("sessionUser", user);
+        return "redirect:/";
     }
 
     @GetMapping("/user/updateForm")
